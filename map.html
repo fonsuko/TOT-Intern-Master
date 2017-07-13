@@ -1,0 +1,155 @@
+
+<!DOCTYPE html >
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Viewer</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+
+    <style>
+    html, body, #map_canvas{width:100%;height:100%;}
+    </style>
+  </head>
+  <body onload="locate()">
+    <div id="map_canvas"></div>
+  </body>
+  <script>
+    var im = 'bluecircle.png';
+    function locate(){
+        navigator.geolocation.getCurrentPosition(initialize,fail);
+    }
+
+    function initialize(position) {
+        var myLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        var mapOptions = {
+          zoom: 5,
+          center: myLatLng,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        var map = new google.maps.Map(document.getElementById('map_canvas'),
+                                      mapOptions);
+        var userMarker = new google.maps.Marker({
+            position: myLatLng,
+            map: map,
+            icon: im
+        });
+
+
+        var infoWindow = new google.maps.InfoWindow;
+
+        downloadUrl('xml.php', function(data) {
+          var xml = data.responseXML;
+          var markers = xml.documentElement.getElementsByTagName('marker');
+          Array.prototype.forEach.call(markers, function(markerElem) {
+            var id = markerElem.getAttribute('id');
+            var name = markerElem.getAttribute('name');
+            var address = markerElem.getAttribute('address');
+            var Asset_Type = markerElem.getAttribute('Asset_Type');
+            var type = markerElem.getAttribute('type');
+            var tube = markerElem.getAttribute('tube_placement');
+            var built = markerElem.getAttribute('built_by');
+            var year = markerElem.getAttribute('manufactured');
+            var id = markerElem.getAttribute('id');
+            var point = new google.maps.LatLng(
+                parseFloat(markerElem.getAttribute('lat')),
+                parseFloat(markerElem.getAttribute('lng')));
+
+            var infowincontent = document.createElement('div');
+            var strong = document.createElement('strong');
+            strong.textContent = name
+            infowincontent.appendChild(strong);
+            infowincontent.appendChild(document.createElement('br'));
+            var a = document.createElement('a');
+            a.textContent = "ที่ :"+point
+            infowincontent.appendChild(a);
+            infowincontent.appendChild(document.createElement('br'));
+
+            var num = document.createElement('num');
+            num.textContent = "ID :"+id
+            infowincontent.appendChild(num);
+            infowincontent.appendChild(document.createElement('br'));
+
+            var text = document.createElement('text');
+            text.textContent = "ว่าง :"+address+" ท่อ"
+            infowincontent.appendChild(text);
+            infowincontent.appendChild(document.createElement('br'));
+            var text1 = document.createElement('text1');
+            text1.textContent = "ประเภทท่อพักสาย: "+Asset_Type
+            infowincontent.appendChild(text1);
+            infowincontent.appendChild(document.createElement('br'));
+            var text2 = document.createElement('text2');
+            text2.textContent = "ชนิด: "+type
+            infowincontent.appendChild(text2);
+            infowincontent.appendChild(document.createElement('br'));
+            var text3 = document.createElement('text3');
+            text3.textContent = "การวางท่อ: "+tube
+            infowincontent.appendChild(text3);
+            infowincontent.appendChild(document.createElement('br'));
+            var text4 = document.createElement('text4');
+            text4.textContent = "สร้างโดย: "+built
+            infowincontent.appendChild(text4);
+            infowincontent.appendChild(document.createElement('br'));
+            var text5 = document.createElement('text5');
+            text5.textContent = "ปีที่สร้าง: "+year
+            infowincontent.appendChild(text5);
+            infowincontent.appendChild(document.createElement('br'));
+
+            var marker = new google.maps.Marker({
+              map: map,
+              position: point,
+              label: name,
+            });
+            marker.addListener('click', function() {
+              infoWindow.setContent(infowincontent);
+              infoWindow.open(map, marker);
+            });
+          });
+        });
+      }
+
+     function fail(){
+         alert('Browser นี้ไม่รองรับ navigator.geolocation กรุณาใช้ Browser อื่น');
+     }
+     function downloadUrl(url, callback) {
+       var request = window.ActiveXObject ?
+           new ActiveXObject('Microsoft.XMLHTTP') :
+           new XMLHttpRequest;
+
+       request.onreadystatechange = function() {
+         if (request.readyState == 4) {
+           request.onreadystatechange = doNothing;
+           callback(request, request.status);
+         }
+       };
+
+       request.open('GET', url, true);
+       request.send(null);
+     }
+     function doNothing() {}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTVD4FJmygewrOtVSjVAbNAEFjX6Aypro">
+    </script>
+</html>
+  </body>
+</html>
